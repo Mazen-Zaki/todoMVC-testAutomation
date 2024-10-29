@@ -6,6 +6,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
+import static drivers.NewDriverManager.getDriver;
 import static org.testng.Assert.assertTrue;
 
 public class TodoPage
@@ -18,6 +19,9 @@ public class TodoPage
     private final By taskInputField = By.className("new-todo");
     private final By allTasks = By.cssSelector(".todo-list li");
 
+    public WebElement taskInputField () {
+        return getDriver().findElement(By.className("new-todo"));
+    }
 
     public TodoPage(WebDriver driver)
     {
