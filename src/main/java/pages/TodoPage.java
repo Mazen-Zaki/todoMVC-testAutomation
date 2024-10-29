@@ -19,55 +19,252 @@ public class TodoPage
     private final By taskInputField = By.className("new-todo");
     private final By allTasks = By.cssSelector(".todo-list li");
 
-    public WebElement taskInputField () {
+
+    /***************************************** Elements *****************************************/
+
+    public WebElement taskInputFieldElement()
+    {
         return getDriver().findElement(By.className("new-todo"));
     }
 
-    public TodoPage(WebDriver driver)
+    public WebElement allTasksElement ()
     {
-        this.driver = driver;
-        act = new Actions(driver);
+        return getDriver().findElement(By.cssSelector(".todo-list li"));
+    }
+
+    public WebElement taskElement(String taskName)
+    {
+        return getDriver().findElement(By.xpath("//label[text()='" + taskName + "']"));
+    }
+
+    public WebElement taskCheckboxElement(String taskName)
+    {
+        return getDriver().findElement(By.xpath("//label[text()='" + taskName + "']/preceding-sibling::input"));
+    }
+
+    public WebElement taskDeleteButtonElement(String taskName)
+    {
+        return getDriver().findElement(By.xpath("//label[text()='" + taskName + "']/following-sibling::button"));
+    }
+
+    public WebElement taskEditFieldElement()
+    {
+        return getDriver().findElement(By.id("edit-todo-input"));
+    }
+
+    public WebElement taskEditFieldElement(String taskName)
+    {
+        return getDriver().findElement(By.xpath("//label[text()='" + taskName + "']/following-sibling::input"));
+    }
+
+    public WebElement taskElementEditField(String taskName)
+    {
+        return getDriver().findElement(By.xpath("//label[text()='" + taskName + "']/following-sibling::input"));
+    }
+
+    public WebElement taskElementEditField()
+    {
+        return getDriver().findElement(By.xpath("//label[text()='']/following-sibling::input"));
+    }
+
+    public WebElement clearCompletedButtonElement()
+    {
+        return getDriver().findElement(By.className("clear-completed"));
+    }
+
+    public WebElement toggleAllButtonElement()
+    {
+        return getDriver().findElement(By.className("toggle-all"));
+    }
+
+    public WebElement toggleAllCheckboxElement()
+    {
+        return getDriver().findElement(By.className("toggle-all"));
+    }
+
+    public WebElement destroyButtonElement()
+    {
+        return getDriver().findElement(By.className("destroy"));
+    }
+
+    public WebElement filterActiveElement()
+    {
+        return getDriver().findElement(By.xpath("//a[text()='Active']"));
+    }
+
+    public WebElement filterCompletedElement()
+    {
+        return getDriver().findElement(By.xpath("//a[text()='Completed']"));
+    }
+
+    public WebElement filterAllElement()
+    {
+        return getDriver().findElement(By.xpath("//a[text()='All']"));
+    }
+
+    public WebElement todoCountElement()
+    {
+        return getDriver().findElement(By.className("todo-count"));
     }
 
 
+
+    /***************************************** Constructor *****************************************/
+
+    public TodoPage()
+    {
+        this.driver = getDriver();
+        act = new Actions(driver);
+    }
+
+    /***************************************** Actions *****************************************/
+
     public TodoPage addTask(String taskName)
     {
-        driver.findElement(taskInputField).sendKeys(taskName + "\n");
+        taskInputFieldElement().sendKeys(taskName + "\n");
         return this;
     }
 
     public TodoPage clearAndEditTask(String taskName, String newTaskName)
     {
-        WebElement editTaskElement= driver.findElement(By.xpath("//label[text()='" + taskName + "']"));
+        WebElement editTaskElement = taskElement(taskName);
         act.doubleClick(editTaskElement).perform();
-        driver.findElement(By.xpath("//input[@id='edit-todo-input']")).sendKeys(Keys.CONTROL + "a", Keys.DELETE);
-        driver.findElement(By.xpath("//input[@id='edit-todo-input']")).sendKeys(newTaskName + Keys.ENTER);
+
+        taskEditFieldElement().sendKeys(Keys.CONTROL + "a", Keys.DELETE);
+        taskEditFieldElement().sendKeys(newTaskName + Keys.ENTER);
 
         return this;
     }
-
 
     public TodoPage markTaskComplete(String taskName)
     {
-        driver.findElement(By.xpath("//label[text()='" + taskName + "']/preceding-sibling::input")).click();
+        taskCheckboxElement(taskName).click();
+        // driver.findElement(By.xpath("//label[text()='" + taskName + "']/preceding-sibling::input")).click();
         return this;
     }
-
 
     public TodoPage deleteTask(String taskName)
     {
-        WebElement task = driver.findElement(By.xpath("//label[text()='" + taskName + "']"));
+        WebElement task = taskElement(taskName);
         act.moveToElement(task).perform();
-        driver.findElement(By.xpath("//label[text()='" + taskName + "']/following-sibling::button")).click();
+        taskDeleteButtonElement(taskName).click();
+//        WebElement task = driver.findElement(By.xpath("//label[text()='" + taskName + "']"));
+//        act.moveToElement(task).perform();
+//        driver.findElement(By.xpath("//label[text()='" + taskName + "']/following-sibling::button")).click();
         return this;
     }
 
+    public TodoPage openEditField(String taskName)
+    {
+        WebElement editTaskElement = taskElement(taskName);
+        act.doubleClick(editTaskElement).perform();
+//        WebElement editTaskElement= driver.findElement(By.xpath("//label[text()='" + taskName + "']"));
+//        act.doubleClick(editTaskElement).perform();
+        return this;
+    }
+
+    public TodoPage refreshPage()
+    {
+        getDriver().navigate().refresh();
+        return this;
+    }
+
+    public TodoPage clearCompletedTasks()
+    {
+        clearCompletedButtonElement().click();
+//        driver.findElement(By.className("clear-completed")).click();
+        return this;
+    }
+
+    public TodoPage toggleTasksComplete()
+    {
+        toggleAllButtonElement().click();
+//        driver.findElement(By.className("toggle-all")).click();
+        return this;
+    }
+
+    public TodoPage deleteAllTasksIndividually()
+    {
+
+        try
+        {
+            for (WebElement task : driver.findElements(allTasks))
+            {
+                act.moveToElement(task).perform();
+                destroyButtonElement().click();
+//                task.findElement(By.xpath("//button[@class=\"destroy\"]")).click();
+            }
+        }
+        catch (Exception e)
+        {
+            return this;
+        }
+
+        return this;
+    }
+
+    public TodoPage deleteCompletedTasksIndividually()
+    {
+        for (WebElement task : driver.findElements(allTasks))
+        {
+            if (task.findElement(By.xpath("./div/input")).isSelected())
+            {
+                act.moveToElement(task).perform();
+                destroyButtonElement().click();
+//                task.findElement(By.xpath("//button[@class=\"destroy\"]")).click();
+            }
+        }
+        return this;
+    }
+
+    public TodoPage filterActive()
+    {
+        filterActiveElement().click();
+//        driver.findElement(By.xpath("//a[text()='Active']")).click();
+        for (WebElement task : driver.findElements(allTasks))
+        {
+            if (task.findElement(By.xpath("./div/input")).isSelected())
+            {
+                assertTrue(false);
+            }
+        }
+        assertTrue(true);
+        return this;
+    }
+
+    public TodoPage filterCompleted()
+    {
+        filterCompletedElement().click();
+//        driver.findElement(By.xpath("//a[text()='Completed']")).click();
+
+        for (WebElement task : driver.findElements(allTasks))
+        {
+            if (!task.findElement(By.xpath("./div/input")).isSelected())
+            {
+                assertTrue(false);
+            }
+        }
+        assertTrue(true);
+        return this;
+    }
+
+    public TodoPage filterAll()
+    {
+        filterAllElement().click();
+//        driver.findElement(By.xpath("//a[text()='All']")).click();
+
+        assertTrue(true);
+        return this;
+    }
+
+
+    /***************************************** Business Logic *****************************************/
 
     public boolean isTaskExists(String taskName)
     {
         try
         {
-            return !driver.findElements(By.xpath("//label[text()='" + taskName + "']")).isEmpty();
+            return driver.findElement(By.xpath("//label[text()='" + taskName + "']")).isDisplayed();
         }
         catch (Exception e)
         {
@@ -109,38 +306,12 @@ public class TodoPage
     {
         try
         {
-            return driver.findElement(By.id("edit-todo-input")).isDisplayed();
+            return taskEditFieldElement().isDisplayed();
         }
         catch (Exception e)
         {
             return false;
         }
-    }
-
-    public TodoPage openEditField(String taskName)
-    {
-        WebElement editTaskElement= driver.findElement(By.xpath("//label[text()='" + taskName + "']"));
-        act.doubleClick(editTaskElement).perform();
-
-        return this;
-    }
-
-    public TodoPage refreshPage()
-    {
-        driver.navigate().refresh();
-        return this;
-    }
-
-    public TodoPage clearCompletedTasks()
-    {
-        driver.findElement(By.className("clear-completed")).click();
-        return this;
-    }
-
-    public TodoPage toggleTasksComplete()
-    {
-        driver.findElement(By.className("toggle-all")).click();
-        return this;
     }
 
     public boolean isAllTasksComplete()
@@ -194,7 +365,7 @@ public class TodoPage
     {
         try
         {
-            String itemCountText = driver.findElement(By.xpath("//span[@class=\"todo-count\"]//strong")).getText();
+            String itemCountText = todoCountElement().getText().split(" ")[0];
             int itemCount = Integer.parseInt(itemCountText);
             return itemCount == taskCount;
         }
@@ -203,70 +374,6 @@ public class TodoPage
             return false;
         }
     }
-
-    public TodoPage deleteAllTasksIndividually()
-    {
-
-        for (WebElement task : driver.findElements(allTasks))
-        {
-            act.moveToElement(task).perform();
-            task.findElement(By.xpath("//button[@class=\"destroy\"]")).click();
-        }
-
-        return this;
-    }
-
-    public TodoPage deleteCompletedTasksIndividually()
-    {
-        for (WebElement task : driver.findElements(allTasks))
-        {
-            if (task.findElement(By.xpath("./div/input")).isSelected())
-            {
-                act.moveToElement(task).perform();
-                task.findElement(By.xpath("//button[@class=\"destroy\"]")).click();
-            }
-        }
-        return this;
-    }
-
-    public TodoPage filterActive()
-    {
-        driver.findElement(By.xpath("//a[text()='Active']")).click();
-        for (WebElement task : driver.findElements(allTasks))
-        {
-            if (task.findElement(By.xpath("./div/input")).isSelected())
-            {
-                assertTrue(false);
-            }
-        }
-        assertTrue(true);
-        return this;
-    }
-
-    public TodoPage filterCompleted()
-    {
-        driver.findElement(By.xpath("//a[text()='Completed']")).click();
-
-        for (WebElement task : driver.findElements(allTasks))
-        {
-            if (!task.findElement(By.xpath("./div/input")).isSelected())
-            {
-                assertTrue(false);
-            }
-        }
-        assertTrue(true);
-        return this;
-    }
-
-    public TodoPage filterAll()
-    {
-        driver.findElement(By.xpath("//a[text()='All']")).click();
-
-        assertTrue(true);
-        return this;
-    }
-
-
 
 
 
