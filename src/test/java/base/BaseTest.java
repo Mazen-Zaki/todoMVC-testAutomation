@@ -55,7 +55,7 @@ public class BaseTest
         driver.get(baseUrl);
 
         // Initialize the login page object
-        todoPage = new TodoPage(driver);
+        todoPage = new TodoPage();
 
         //Instantiating Actions class
         act = new Actions(driver);
